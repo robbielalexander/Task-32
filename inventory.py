@@ -39,11 +39,97 @@ class Shoes():
         else:
             self.quantity += quantity_change
 
-new_shoes = Shoes("UK", "3422", "Airmax", 34.99, 40)
 
-print(new_shoes)
+def read_shoes_data() -> list:
+    """This function reads the inventory file and adds all the data 
+    to a list as Shoe objects."""
+    # initialise an empty list 
+    shoes_list = []
+    # read the file 
+    with open("./Task 32/inventory.txt", 'r') as shoe_file:
+        for line in shoe_file:
+            country, code, product, cost, quantity = interpret_inventory_file_line(line)
+            shoes_list.append(Shoes(country, code, product, cost, quantity))
+    return shoes_list
 
-new_shoes.update_quantity(40)
-new_shoes.update_cost(59.99)
+def interpret_inventory_file_line(input_line: str) -> list:
+    """This is used to change """
+    line = input_line.replace("\n", "").split(",")
+    print(line)
+    return [item for item in line]
 
-print(new_shoes)
+def capture_shoes():
+    pass
+
+def view_all():
+    pass
+
+def restock_shoe():
+    pass
+
+def search_shoe():
+    pass
+
+def value_per_item():
+    pass
+
+def highest_quantity():
+    pass 
+
+def menu(shoes_list: list) -> None:
+    """This is the main menu for the program"""
+    while True:
+        menu_options()
+        user_selection = input()
+        menu_divider()
+        if "1" in user_selection:
+            capture_shoes()
+        elif "2" in user_selection:
+            view_all()
+        elif "3" in user_selection:
+            restock_shoe()
+        elif "4" in user_selection:
+            search_shoe()
+        elif "5" in user_selection:
+            value_per_item()
+        elif "6" in user_selection:
+            highest_quantity()
+        elif "7" in user_selection:
+            exit()
+        else:
+            menu_divider()
+            print("I have not understood your selection. Please try again")
+            menu_divider()
+        
+def menu_options():
+    """This displays the menu options the user can choose."""
+    print("Please select from the following options:")
+    print("1 - add new shoe;")
+    print("2 - view all shoe information;")
+    print("3 - restock shoes;")
+    print("4 - search for shoe;")
+    print("5 - show inventory value;")
+    print("6 - show shoe with highest quantity;")
+    print("7 - quit program.")
+
+def menu_divider():
+    print("-" * 60)
+
+def main():
+    """This is the main program that runs."""
+    # in the first place create the empty shoe list 
+    shoes_list = read_shoes_data()
+    # Then I will read the inventory text file and populate this 
+    # empty list 
+
+    # Then I will show the menu, through which the user can 
+    # select what they want to do. 
+    menu(shoes_list)
+
+
+
+
+
+
+
+main()

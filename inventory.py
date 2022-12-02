@@ -77,8 +77,8 @@ def capture_shoes(shoe_list: list) -> list:
         country = input("Enter the country the shoes are from: ")
         code = input("Enter the code for the shoes: ")
         product = input("Enter the product name: ")
-        cost = int_check("Enter the cost of the project: ")
-        quantity = int_check("Enter the quanity of the product: ")
+        cost = int_check("Enter the cost of the product: ")
+        quantity = int_check("Enter the quantity of the product: ")
         new_shoe = Shoes(country, code, product, cost, quantity)
         print(new_shoe)
         menu_divider()
@@ -107,8 +107,33 @@ def view_all(shoes_list: list) -> None:
         print(shoe)
         menu_divider()
 
-def restock_shoe():
-    pass
+def restock_shoe(shoes_list: list) -> list:
+    """This functino finds the shoes which have the lowest stock and then 
+    allows the user to update with the amount of stock they want to add"""
+    min_quantity = 10000
+    index_of_min_quantity = 0
+    for index, shoe in enumerate(shoes_list):
+        if shoe.quantity < min_quantity:
+            min_quantity = shoe.quantity
+            index_of_min_quantity = index
+    low_stock_shoe = shoes_list[index_of_min_quantity]
+    print(f"""{low_stock_shoe.product} is low on stock and there are only 
+    {low_stock_shoe.quantity} pairs left.""")
+    menu_divider()
+    # ask the user if they want to restock the shoe.
+    while True:
+        user_choice = input("Do you want to restock this shoe? (y/n)")
+        if user_choice in ["y", "yes"]:
+            restock_amount = int_check("How many do you want to order? ")
+            shoes_list[index_of_min_quantity].update_quantity(restock_amount)
+            break
+        elif user_choice in ["n", "no"]:
+            break
+        else:
+            print("I didn't understand your choice.")
+    menu_divider()
+    return shoes_list
+    
 
 def search_shoe(shoes_list: list) -> None:
     """This function searches the shoe list for a shoe based 
@@ -144,7 +169,7 @@ def value_per_item(shoes_list: list) -> None:
         print(f"{index + 1}: {shoe.product} has the value R{value}.")
         menu_divider()
 
-def highest_quantity(shoes_list: list, percent_discount: float) -> None:
+def highest_quantity(shoes_list: list, percent_discount: float) -> list:
     """This function finds the shoe with the highest quantity and 
     then offers it for sale"""
     max_quantity = 0
@@ -156,9 +181,12 @@ def highest_quantity(shoes_list: list, percent_discount: float) -> None:
     # print out the shoe 
     sale_shoe = shoes_list[index_of_max_quantity]
     sale_shoe_price = int(sale_shoe.cost - (percent_discount * sale_shoe.cost))
-    print(f"""{sale_shoe.product} is now for sale for R{sale_shoe_price}, 
+    print(f"""{sale_shoe.product} ({sale_shoe.code}) is now for sale for R{sale_shoe_price}, 
     down from R{sale_shoe.cost}, a {percent_discount*100}% reduction.""")
     menu_divider()
+    # update the shoe information in the list
+    shoes_list[index_of_max_quantity].update_cost(sale_shoe_price)
+    return shoes_list
 
 def menu(shoes_list: list) -> None:
     """This is the main menu for the program"""
@@ -173,13 +201,18 @@ def menu(shoes_list: list) -> None:
             # display all the shoe information for the user
             view_all(shoes_list)
         elif "3" in user_selection:
-            restock_shoe()
+            # This function allows a user to restock a shoe
+            shoes_list = restock_shoe(shoes_list)
         elif "4" in user_selection:
+            # Finds shoe information based on the shoe code
             search_shoe(shoes_list)
         elif "5" in user_selection:
+            # returns the total value of the shoe in the database
             value_per_item(shoes_list)
         elif "6" in user_selection:
-            highest_quantity(shoes_list, 0.3)
+            # puts the shoe with the highest stock level on sale 
+            # and reduces the price by the indicated percentage. 
+            shoes_list = highest_quantity(shoes_list, 0.3)
         elif "7" in user_selection:
             exit()
         else:
@@ -199,22 +232,16 @@ def menu_options():
     print("7 - quit program.")
 
 def menu_divider():
+    """This function adds a line of dashes to the terminal, to break 
+    up display text. """
     print("-" * 60)
 
-def main():
+def inventory_program():
     """This is the main program that runs."""
     # When starting the program each time, I read the inventory file. 
     shoes_list = read_shoes_data()
-    
-
     # Then I will show the menu, through which the user can 
     # select what they want to do. 
     menu(shoes_list)
 
-
-
-
-
-
-
-main()
+inventory_program()

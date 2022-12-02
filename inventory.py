@@ -5,7 +5,7 @@ class Shoes():
     def __init__(self, country: str, 
                         code: str, 
                         product: str, 
-                        cost: float, 
+                        cost: int, 
                         quantity: int):
         self.country = country
         self.code = code
@@ -15,10 +15,10 @@ class Shoes():
 
     def __str__(self) -> str:
         return f"""The shoe {self.product} is from {self.country} with 
-        code {self.code} costs £{self.cost} and there are {self.quantity}
+        code {self.code} costs R{self.cost} and there are {self.quantity}
         in stock."""
 
-    def get_cost(self) -> float:
+    def get_cost(self) -> int:
         """This function returns the cost of the shoes"""
         return self.cost
 
@@ -26,7 +26,7 @@ class Shoes():
         """This function returns the quantity of the shoes"""
         return self.quantity
 
-    def update_cost(self, new_price: float) -> None:
+    def update_cost(self, new_price: int) -> None:
         """This function updates the price of the shoes"""
         self.cost = new_price
 
@@ -46,35 +46,119 @@ def read_shoes_data() -> list:
     # initialise an empty list 
     shoes_list = []
     # read the file 
-    with open("./Task 32/inventory.txt", 'r') as shoe_file:
-        for line in shoe_file:
-            country, code, product, cost, quantity = interpret_inventory_file_line(line)
-            shoes_list.append(Shoes(country, code, product, cost, quantity))
-    return shoes_list
+    try:
+        with open("./Task 32/inventory.txt", 'r') as shoe_file:
+            for line in shoe_file:
+                country, code, product, cost, quantity = interpret_inventory_file_line(line)
+                shoes_list.append(Shoes(country, code, product, cost, quantity))
+    # Since the header is included in this list, when I return the shoes list, 
+    # I will not include the header. 
+        return shoes_list[1:]
+    except:
+        # if the file isn't found, just return an empty list
+        print("No inventory data found.")
+        return shoes_list
 
-def interpret_inventory_file_line(input_line: str) -> list:
-    """This is used to change """
+def interpret_inventory_file_line(input_line: str) -> tuple:
+    """This is used to change the input line from the file 
+    into a useful form to be put into the shoe object."""
     line = input_line.replace("\n", "").split(",")
-    print(line)
-    return [item for item in line]
+    country = line[0]
+    code = line[1]
+    product = line[2]
+    cost = int(line[3]) if line[3].isdigit() else line[3]
+    quantity = int(line[4]) if line[4].isdigit() else line[4]
+    return country, code, product, cost, quantity
 
-def capture_shoes():
-    pass
+def capture_shoes(shoe_list: list) -> list:
+    """This lets a user add information about a shoe to the shoe list"""
+    print("With this option you can add shoe information to the shoe list")
+    while True: 
+        country = input("Enter the country the shoes are from: ")
+        code = input("Enter the code for the shoes: ")
+        product = input("Enter the product name: ")
+        cost = int_check("Enter the cost of the project: ")
+        quantity = int_check("Enter the quanity of the product: ")
+        new_shoe = Shoes(country, code, product, cost, quantity)
+        print(new_shoe)
+        menu_divider()
+        print("Is the above information correct? (y/n)")
+        user_choice = input().lower()
+        if user_choice in ["y", "yes"]:
+            print("The information has been added to the database.")
+            break
+    # Add the new shoe information to the list. 
+    shoe_list.append(new_shoe) 
+    return shoe_list
 
-def view_all():
-    pass
+def int_check(message: str) -> int:
+    """This function is used to ensure the user enters an int"""
+    while True:
+        input_number = input(message)
+        try:
+            input_number = int(input_number)
+            return input_number
+        except ValueError:
+            print("The input has not been recognised as a number, try again.")
+
+def view_all(shoes_list: list) -> None:
+    """This prints out all the shoe information"""
+    for shoe in shoes_list:
+        print(shoe)
+        menu_divider()
 
 def restock_shoe():
     pass
 
-def search_shoe():
-    pass
+def search_shoe(shoes_list: list) -> None:
+    """This function searches the shoe list for a shoe based 
+    on the input code and then prints out the information for 
+    the user."""
+    shoe_found = False
+    while True:
+        shoe_code = input("Enter the product code: ")
+        for shoe in shoes_list:
+            if shoe.code == shoe_code:
+                # if the shoe is found print it out.
+                menu_divider()
+                print(shoe)
+                menu_divider()
+                shoe_found = True
+                break 
+        # if the shoe was found or not, present the user with the options.
+        if shoe_found:
+            print("Do you want to search for another shoe? (y/n)")
+        else:
+            print("No shoe found. Do you want to try again? (y/n)")
+        # based on the user choice, let them search for another shoe or 
+        # go back to the main menu.
+        user_choice = input().lower()
+        if user_choice not in ["y", "yes"]:
+            break
 
-def value_per_item():
-    pass
+def value_per_item(shoes_list: list) -> None:
+    """This prints the value for each product using the 
+    formula cost * quantity"""
+    for index, shoe in enumerate(shoes_list):
+        value = shoe.cost * shoe.quantity
+        print(f"{index + 1}: {shoe.product} has the value R{value}.")
+        menu_divider()
 
-def highest_quantity():
-    pass 
+def highest_quantity(shoes_list: list, percent_discount: float) -> None:
+    """This function finds the shoe with the highest quantity and 
+    then offers it for sale"""
+    max_quantity = 0
+    index_of_max_quantity = 0
+    for index, shoe in enumerate(shoes_list):
+        if shoe.quantity > max_quantity:
+            max_quantity = shoe.quantity
+            index_of_max_quantity = index
+    # print out the shoe 
+    sale_shoe = shoes_list[index_of_max_quantity]
+    sale_shoe_price = int(sale_shoe.cost - (percent_discount * sale_shoe.cost))
+    print(f"""{sale_shoe.product} is now for sale for R{sale_shoe_price}, 
+    down from R{sale_shoe.cost}, a {percent_discount*100}% reduction.""")
+    menu_divider()
 
 def menu(shoes_list: list) -> None:
     """This is the main menu for the program"""
@@ -83,17 +167,19 @@ def menu(shoes_list: list) -> None:
         user_selection = input()
         menu_divider()
         if "1" in user_selection:
-            capture_shoes()
+            # let the user add a shoe to the list
+            shoes_list = capture_shoes(shoes_list)
         elif "2" in user_selection:
-            view_all()
+            # display all the shoe information for the user
+            view_all(shoes_list)
         elif "3" in user_selection:
             restock_shoe()
         elif "4" in user_selection:
-            search_shoe()
+            search_shoe(shoes_list)
         elif "5" in user_selection:
-            value_per_item()
+            value_per_item(shoes_list)
         elif "6" in user_selection:
-            highest_quantity()
+            highest_quantity(shoes_list, 0.3)
         elif "7" in user_selection:
             exit()
         else:
@@ -117,10 +203,9 @@ def menu_divider():
 
 def main():
     """This is the main program that runs."""
-    # in the first place create the empty shoe list 
+    # When starting the program each time, I read the inventory file. 
     shoes_list = read_shoes_data()
-    # Then I will read the inventory text file and populate this 
-    # empty list 
+    
 
     # Then I will show the menu, through which the user can 
     # select what they want to do. 
